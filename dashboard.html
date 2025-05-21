@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro de Salud - Mi Cuenta</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
@@ -12,7 +13,7 @@
             <h1>Mi Cuenta</h1>
             <nav>
                 <ul>
-                    <li><a href="#" id="logout">Cerrar Sesión</a></li>
+                    <li><a href="#" id="logout">Cerrar Sesión <i class="fas fa-sign-out-alt"></i></a></li>
                 </ul>
             </nav>
         </div>
@@ -23,16 +24,19 @@
     <main class="container">
         <aside id="user-menu">
             <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
                 <h3 id="user-name">Nombre Usuario</h3>
                 <p id="user-email">email@ejemplo.com</p>
             </div>
             
             <nav>
                 <ul>
-                    <li><a href="#" class="menu-item active" data-section="pedir-cita">Pedir Cita</a></li>
-                    <li><a href="#" class="menu-item" data-section="mis-datos">Mis Datos</a></li>
-                    <li><a href="#" class="menu-item" data-section="modificar-datos">Modificar Datos</a></li>
-                    <li><a href="#" class="menu-item" data-section="mis-citas">Mis Citas</a></li>
+                    <li><a href="#" class="menu-item active" data-section="pedir-cita"><i class="fas fa-calendar-plus"></i> Pedir Cita</a></li>
+                    <li><a href="#" class="menu-item" data-section="mis-datos"><i class="fas fa-user"></i> Mis Datos</a></li>
+                    <li><a href="#" class="menu-item" data-section="modificar-datos"><i class="fas fa-edit"></i> Modificar Datos</a></li>
+                    <li><a href="#" class="menu-item" data-section="mis-citas"><i class="fas fa-calendar-alt"></i> Mis Citas</a></li>
                 </ul>
             </nav>
         </aside>
@@ -40,16 +44,152 @@
         <section id="content-area">
             <!-- Sección Pedir Cita -->
             <div id="pedir-cita" class="content-section active">
-                <h2>Pedir Nueva Cita</h2>
+                <h2><i class="fas fa-calendar-plus"></i> Pedir Nueva Cita</h2>
                 <form id="cita-form">
-                    <div class="form-group">
-                        <label for="fecha">Fecha:</label>
-                        <input type="date" id="fecha" name="fecha" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                            <input type="date" id="fecha" name="fecha" required min="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hora"><i class="fas fa-clock"></i> Hora:</label>
+                            <select id="hora" name="hora" required>
+                                <option value="">Seleccione una hora</option>
+                                <option value="09:00">09:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="15:00">03:00 PM</option>
+                                <option value="16:00">04:00 PM</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hora">Hora:</label>
-                        <select id="hora" name="hora" required>
+                        <label><i class="fas fa-user-md"></i> Seleccione un doctor:</label>
+                        <div class="doctors-grid" id="doctors-container">
+                            <!-- Los doctores se cargarán aquí dinámicamente -->
+                            <div class="loading-doctors">
+                                <i class="fas fa-spinner fa-spin"></i> Cargando doctores...
+                            </div>
+                        </div>
+                        <input type="hidden" id="doctor_id" name="doctor_id" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="motivo"><i class="fas fa-comment-medical"></i> Motivo:</label>
+                        <textarea id="motivo" name="motivo" rows="4" required placeholder="Describa el motivo de su cita..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Solicitar Cita
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Sección Mis Datos -->
+            <div id="mis-datos" class="content-section">
+                <h2><i class="fas fa-user"></i> Mis Datos Personales</h2>
+                <div class="user-data">
+                    <p><strong><i class="fas fa-id-card"></i> Nombre:</strong> <span id="data-nombre"></span></p>
+                    <p><strong><i class="fas fa-id-card"></i> Apellido:</strong> <span id="data-apellido"></span></p>
+                    <p><strong><i class="fas fa-phone"></i> Teléfono:</strong> <span id="data-telefono"></span></p>
+                    <p><strong><i class="fas fa-envelope"></i> Email:</strong> <span id="data-email"></span></p>
+                    <p><strong><i class="fas fa-city"></i> Localidad:</strong> <span id="data-localidad"></span></p>
+                    <p><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong> <span id="data-calle"></span></p>
+                    <p><strong><i class="fas fa-mail-bulk"></i> Código Postal:</strong> <span id="data-codigo-postal"></span></p>
+                </div>
+            </div>
+            
+            <!-- Sección Modificar Datos -->
+            <div id="modificar-datos" class="content-section">
+                <h2><i class="fas fa-edit"></i> Modificar Mis Datos</h2>
+                <form id="update-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="update-nombre"><i class="fas fa-id-card"></i> Nombre:</label>
+                            <input type="text" id="update-nombre" name="nombre" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="update-apellido"><i class="fas fa-id-card"></i> Apellido:</label>
+                            <input type="text" id="update-apellido" name="apellido" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="update-telefono"><i class="fas fa-phone"></i> Teléfono:</label>
+                        <input type="tel" id="update-telefono" name="telefono" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="update-localidad"><i class="fas fa-city"></i> Localidad:</label>
+                            <input type="text" id="update-localidad" name="localidad" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="update-calle"><i class="fas fa-map-marker-alt"></i> Calle y Número:</label>
+                            <input type="text" id="update-calle" name="calle" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="update-codigo_postal"><i class="fas fa-mail-bulk"></i> Código Postal:</label>
+                        <input type="text" id="update-codigo_postal" name="codigo_postal" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Sección Mis Citas -->
+            <div id="mis-citas" class="content-section">
+                <h2><i class="fas fa-calendar-alt"></i> Mis Citas</h2>
+                
+                <div class="citas-section">
+                    <h3><i class="fas fa-calendar-check"></i> Próximas Citas</h3>
+                    <div id="proximas-citas" class="citas-list">
+                        <div class="loading-citas">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando citas...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="citas-section">
+                    <h3><i class="fas fa-history"></i> Citas Anteriores</h3>
+                    <div id="anteriores-citas" class="citas-list">
+                        <div class="loading-citas">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando citas...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de edición de citas -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-edit"></i> Editar Cita</h2>
+            <form id="edit-cita-form">
+                <input type="hidden" id="edit-cita-id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-fecha"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                        <input type="date" id="edit-fecha" name="fecha" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-hora"><i class="fas fa-clock"></i> Hora:</label>
+                        <select id="edit-hora" name="hora" required>
                             <option value="">Seleccione una hora</option>
                             <option value="09:00">09:00 AM</option>
                             <option value="10:00">10:00 AM</option>
@@ -61,88 +201,34 @@
                             <option value="16:00">04:00 PM</option>
                         </select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="motivo">Motivo:</label>
-                        <textarea id="motivo" name="motivo" rows="4" required></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Solicitar Cita</button>
-                </form>
-            </div>
-            
-            <!-- Sección Mis Datos -->
-            <div id="mis-datos" class="content-section">
-                <h2>Mis Datos Personales</h2>
-                <div class="user-data">
-                    <p><strong>Nombre:</strong> <span id="data-nombre"></span></p>
-                    <p><strong>Apellido:</strong> <span id="data-apellido"></span></p>
-                    <p><strong>Teléfono:</strong> <span id="data-telefono"></span></p>
-                    <p><strong>Email:</strong> <span id="data-email"></span></p>
-                    <p><strong>Localidad:</strong> <span id="data-localidad"></span></p>
-                    <p><strong>Dirección:</strong> <span id="data-calle"></span></p>
-                    <p><strong>Código Postal:</strong> <span id="data-codigo-postal"></span></p>
-                </div>
-            </div>
-            
-            <!-- Sección Modificar Datos -->
-            <div id="modificar-datos" class="content-section">
-                <h2>Modificar Mis Datos</h2>
-                <form id="update-form">
-                    <div class="form-group">
-                        <label for="update-nombre">Nombre:</label>
-                        <input type="text" id="update-nombre" name="nombre" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="update-apellido">Apellido:</label>
-                        <input type="text" id="update-apellido" name="apellido" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="update-telefono">Teléfono:</label>
-                        <input type="tel" id="update-telefono" name="telefono" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="update-localidad">Localidad:</label>
-                        <input type="text" id="update-localidad" name="localidad" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="update-calle">Calle y Número:</label>
-                        <input type="text" id="update-calle" name="calle" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="update-codigo_postal">Código Postal:</label>
-                        <input type="text" id="update-codigo_postal" name="codigo_postal" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-            </div>
-            
-            <!-- Sección Mis Citas -->
-            <div id="mis-citas" class="content-section">
-                <h2>Mis Citas</h2>
-                
-                <div class="citas-section">
-                    <h3>Próximas Citas</h3>
-                    <div id="proximas-citas" class="citas-list">
-                        <!-- Las citas se cargarán aquí dinámicamente -->
-                    </div>
                 </div>
                 
-                <div class="citas-sectio">
-                    <h3>Citas Anteriores</h3>
-                    <div id="anteriores-citas" class="citas-list">
-                        <!-- Las citas se cargarán aquí dinámicamente -->
+                <div class="form-group">
+                    <label><i class="fas fa-user-md"></i> Seleccione un doctor:</label>
+                    <div class="doctors-grid" id="edit-doctors-container">
+                        <div class="loading-doctors">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando doctores...
+                        </div>
                     </div>
+                    <input type="hidden" id="edit-doctor_id" name="doctor_id" required>
                 </div>
-            </div>
-        </section>
-    </main>
+                
+                <div class="form-group">
+                    <label for="edit-motivo"><i class="fas fa-comment-medical"></i> Motivo:</label>
+                    <textarea id="edit-motivo" name="motivo" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <button type="button" id="cancel-cita" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancelar Cita
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <footer>
         <div class="container">

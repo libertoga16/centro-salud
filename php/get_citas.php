@@ -9,31 +9,28 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+if (!isset($_GET['id'])) {
+    echo json_encode(['error' => 'ID de cita no proporcionado']);
+    exit();
+}
+
 try {
-    // Citas próximas (desde hoy en adelante)
-    $stmt = $conn->prepare("SELECT id, DATE_FORMAT(fecha, '%Y-%m-%d') as fecha, 
-                          TIME_FORMAT(hora, '%H:%i') as hora, motivo, estado 
-                          FROM citas 
-                          WHERE usuario_id = :user_id AND fecha >= CURDATE()
-                          ORDER BY fecha, hora");
-    $stmt->bindParam(':user_id', $_SESSION['user_id']);
+    $stmt = $conn->prepare("SELECT c.id, DATE_FORMAT(c.fecha, '%Y-%m-%d') as fecha, 
+                          TIME_FORMAT(c.hora, '%H:%i') as hora, c.motivo, c.doctor_id,
+                          CONCAT(d.nombre, ' ', d.apellido) as doctor_nombre
+                          FROM citas c
+                          JOIN doctores d ON c.doctor_id = d.id
+                          WHERE c.id = :id AND c.usuario_id = :usuario_id");
+    $stmt->bindParam(':id', $_GET['id']);
+    $stmt->bindParam(':usuario_id', $_SESSION['user_id']);
     $stmt->execute();
-    $proximas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Citas anteriores (antes de hoy)
-    $stmt = $conn->prepare("SELECT id, DATE_FORMAT(fecha, '%Y-%m-%d') as fecha, 
-                          TIME_FORMAT(hora, '%H:%i') as hora, motivo, estado 
-                          FROM citas 
-                          WHERE usuario_id = :user_id AND fecha < CURDATE()
-                          ORDER BY fecha DESC, hora DESC");
-    $stmt->bindParam(':user_id', $_SESSION['user_id']);
-    $stmt->execute();
-    $anteriores = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'proximas' => $proximas,
-        'anteriores' => $anteriores
-    ]);
+    if ($stmt->rowCount() === 1) {
+        $cita = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode($cita);
+    } else {
+        echo json_encode(['error' => 'Cita no encontrada']);
+    }
 } catch(PDOException $e) {
     echo json_encode(['error' => 'Error en el servidor']);
 }
